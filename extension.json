@@ -3,7 +3,7 @@
   "name": "ollama",
   "organization": "Tobias Wolf",
   "description": "Generate and complete code with ollama.",
-  "version": "1.0",
+  "version": "1.0.1",
   "license": "MIT",
   "repository": "https://github.com/tobiasfabian/nova-ollama",
   "bugs": "https://github.com/tobiasfabian/nova-ollama/issues",
@@ -81,47 +81,42 @@
       "key": "tobiaswolf.ollama.origin",
       "title": "Ollama URL",
       "type": "string",
-      "placeholder": "http://localhost:11434",
-      "default": "http://localhost:11434"
+      "placeholder": "Inherit from global settings"
     },
     {
       "key": "tobiaswolf.ollama.modelName",
       "title": "Model name",
       "type": "string",
-      "placeholder": "e.g. llama2 or openhermes2.5-mistral:7b-q4_K_M",
-      "default": "llama2",
+      "placeholder": "Inherit from global settings",
       "description": "The model has to be installed. Model names follow a model:tag format, where model can have an optional namespace such as example/model. The tag is optional and, if not provided, will default to latest. The tag is used to identify a specific version."
     },
     {
       "key": "tobiaswolf.ollama.modelParameters",
       "title": "Model Parameters",
       "type": "text",
-      "placeholder": "e.g. { \"num_predict\": 256 }",
+      "placeholder": "Inherit from global settings",
       "description": "A JSON object with model parameters."
     },
     {
       "key": "tobiaswolf.ollama.modelKeepAlive",
       "title": "Model keep alive",
       "type": "string",
-      "default": "5m",
-      "placeholder": "5m",
+      "placeholder": "Inherit from global settings",
       "description": "Controls how long the model will stay loaded into memory following the request."
     },
     {
       "key": "tobiaswolf.ollama.systemMessageCompleteCode",
       "title": "System message “Complete code”",
       "type": "text",
-      "placeholder": "e.g. “You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Code should not be in a code block. Anything that is not code should be written as a code comment.”",
-      "default": "You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Code should not be in a code block. Anything that is not code should be written as a code comment.",
-      "description": "This system message is used, when you run the “Complete code” command."
+      "placeholder": "Inherit from global settings",
+      "description": "Leave empty to inherit from global settings. This system message is used, when you run the “Complete code” command."
     },
     {
       "key": "tobiaswolf.ollama.systemMessageAssist",
       "title": "System message “Assist”",
       "type": "text",
-      "placeholder": "e.g. “You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code blocks. Don’t repeat the input.”",
-      "default": "You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code blocks. Don’t repeat the input.",
-      "description": "This system message is used, when you run the “Assist” command."
+      "placeholder": "Inherit from global settings",
+      "description": "Leave empty to inherit from global settings. This system message is used, when you run the “Assist” command."
     }
   ]
 }

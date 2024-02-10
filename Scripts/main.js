@@ -7,16 +7,30 @@ const encoder = new TextDecoder();
 // Toggle which controls insertStream()
 let continueReading = true;
 
-let ollamaOrigin = nova.config.get('tobiaswolf.ollama.origin') ?? 'http://localhost:11434';
-let apiUrl = `${ollamaOrigin}/api`;
-let modelName = nova.config.get('tobiaswolf.ollama.modelName') ?? 'llama2';
+
+const getApiUrl = () => {
+	let ollamaOrigin = nova.workspace.config.get('tobiaswolf.ollama.origin') ?? nova.config.get('tobiaswolf.ollama.origin') ?? 'http://localhost:11434'
+	return `${ollamaOrigin}/api`;
+}
+
+const getModelName = () => {
+	return nova.workspace.config.get('tobiaswolf.ollama.modelName') ?? nova.config.get('tobiaswolf.ollama.modelName') ?? 'llama2'
+}
+
+const getModelParameters = () => {
+	return JSON.parse(nova.workspace.config.get('tobiaswolf.ollama.modelParameters') ?? nova.config.get('tobiaswolf.ollama.modelParameters') ?? '{}');
+}
+
+const getModelKeepAlive = () => {
+	return nova.workspace.config.get('tobiaswolf.ollama.modelKeepAlive') ?? nova.config.get('tobiaswolf.ollama.modelKeepAlive') ?? '5m'
+}
 
 const checkIfModelExists = async () => {
 	try {
-		const response = await fetch(`${apiUrl}/show`, {
+		const response = await fetch(`${getApiUrl()}/show`, {
 			method: 'post',
 			body: JSON.stringify({
-				name: modelName,
+				name: getModelName(),
 			}),
 		});
 		console.log('🦙 ollama model check:', response.ok ? 'ok' : 'failed');
@@ -43,14 +57,16 @@ const showError = async (message) => {
 const requestOllama = async (input, apiSystem) => {
 	try {
 		openCancelNotificationRequest();
+		const modelName = getModelName();
+		const apiUrl = getApiUrl();
 
 		if (input === '') {
 			console.log(`No input provided. ${input}`);
 			return;
 		}
 
-		const modelParameters = JSON.parse(nova.config.get('tobiaswolf.ollama.modelParameters') ?? '{}');
-		const keepAlive = nova.config.get('tobiaswolf.ollama.modelKeepAlive') ?? '5m';
+		const modelParameters = getModelParameters();
+		const keepAlive = getModelKeepAlive();
 		console.log(`Start request for “${input}” [${modelName} (${JSON.stringify(modelParameters)}): ${apiSystem}]`);
 
 		const response = await fetch(`${apiUrl}/generate`, {
@@ -63,15 +79,25 @@ const requestOllama = async (input, apiSystem) => {
 				options: modelParameters,
 				keep_alive: keepAlive,
 			}),
-		}).catch((error) => {
-			console.log(error);
+		}).catch((exception) => {
+			console.log(exception);
+			showError(exception);
 		});
 
 		console.log('Response status', response.status)
 
+		if (!response.ok) {
+			const exception = `Response status: ${response.status} (Model: ${modelName}, URL: ${apiUrl})`;
+			nova.notifications.cancel('ollama-cancel-request');
+			console.error(exception);
+			showError(exception);
+			return false;
+		}
+
 		return response;
 	} catch (exception) {
 		console.error(exception);
+		nova.notifications.cancel('ollama-cancel-request');
 		showError(exception);
 	}
 }
@@ -226,19 +252,6 @@ const openAssistant = async (editor) => {
 		console.error(exception);
 	}
 };
-
-
-// Listen to setting changes
-
-nova.config.onDidChange('tobiaswolf.ollama.origin', (disposable) => {
-	ollamaOrigin = disposable;
-	apiUrl = `${ollamaOrigin}/api`;
-	checkIfModelExists();
-});
-nova.config.onDidChange('tobiaswolf.ollama.modelName', (disposable) => {
-	modelName = disposable;
-	checkIfModelExists();
-});
 
 
 // Add commands

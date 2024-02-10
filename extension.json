@@ -7,6 +7,7 @@
   "license": "MIT",
   "repository": "https://github.com/tobiasfabian/nova-ollama",
   "bugs": "https://github.com/tobiasfabian/nova-ollama/issues",
+  "funding": "https://github.com/sponsors/tobiasfabian",
   "categories": [
     "commands"
   ],
@@ -22,7 +23,8 @@
       },
       {
         "title": "Assist",
-        "command": "tobiaswolf.ollama.assist"
+        "command": "tobiaswolf.ollama.assist",
+        "shortcut": "cmd-opt-ctrl-p"
       }
     ]
   },
@@ -61,16 +63,16 @@
       "key": "tobiaswolf.ollama.systemMessageCompleteCode",
       "title": "System message “Complete code”",
       "type": "text",
-      "placeholder": "e.g. “You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Don’t format code. Don’t put code in code block. Don’t repeat the input.”",
-      "default": "You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Don’t format code. Don’t put code in code block. Don’t repeat the input.",
+      "placeholder": "e.g. “You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Code should not be in a code block. Anything that is not code should be written as a code comment.”",
+      "default": "You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Code should not be in a code block. Anything that is not code should be written as a code comment.",
       "description": "This system message is used, when you run the “Complete code” command."
     },
     {
       "key": "tobiaswolf.ollama.systemMessageAssist",
       "title": "System message “Assist”",
       "type": "text",
-      "placeholder": "e.g. “You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code block. Don’t repeat the input.”",
-      "default": "You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code block. Don’t repeat the input.",
+      "placeholder": "e.g. “You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code blocks. Don’t repeat the input.”",
+      "default": "You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code blocks. Don’t repeat the input.",
       "description": "This system message is used, when you run the “Assist” command."
     }
   ],
@@ -109,16 +111,16 @@
       "key": "tobiaswolf.ollama.systemMessageCompleteCode",
       "title": "System message “Complete code”",
       "type": "text",
-      "placeholder": "e.g. “You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Don’t format code. Don’t put code in code block. Don’t repeat the input.”",
-      "default": "You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Don’t format code. Don’t put code in code block. Don’t repeat the input.",
+      "placeholder": "e.g. “You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Code should not be in a code block. Anything that is not code should be written as a code comment.”",
+      "default": "You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Code should not be in a code block. Anything that is not code should be written as a code comment.",
       "description": "This system message is used, when you run the “Complete code” command."
     },
     {
       "key": "tobiaswolf.ollama.systemMessageAssist",
       "title": "System message “Assist”",
       "type": "text",
-      "placeholder": "e.g. “You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code block. Don’t repeat the input.”",
-      "default": "You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code block. Don’t repeat the input.",
+      "placeholder": "e.g. “You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code blocks. Don’t repeat the input.”",
+      "default": "You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code blocks. Don’t repeat the input.",
       "description": "This system message is used, when you run the “Assist” command."
     }
   ]

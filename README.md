@@ -1,6 +1,10 @@
-This Nova extension integrates [ollama](https://ollama.com) to help you *complete code* or *generate code* based on a prompt.
+This Nova extension integrates [ollama](https://ollama.com) to help you *complete code* or *generate code* based on a prompt. This extension was developed to use code completion without external services, to ensure privacy and to be independent of online services.
 
 The extension comes with two commands, `Assist` and `Complete code`.
+
+<video src="https://github.com/tobiasfabian/nova-ollama/assets/1524319/6b3058e8-a9d1-4d1e-b511-e4943aac11c8" autoplay muted loop width="600"></video>
+
+<video src="https://github.com/tobiasfabian/nova-ollama/assets/1524319/2de55322-989a-4e13-bf4e-660688d5ab09" autoplay muted loop width="600"></video>
 
 
 ## Requirements
@@ -21,6 +25,7 @@ To run one of these commands
 - Select the **Editor → ollama** menu item and click on `Assist` or `Complete code`
 - Open **Command Palette …** (`shift + cmd + p`) and type `Assist` or `Complete code`
 
+The `Assist` command is bind to `cmd + opt + ctrl + p`. To change the key binding, open the **Settings**, got to **Key Bindings** and search for *Assist*.
 
 ### Configuration
 
@@ -58,20 +63,18 @@ Controls how long the model will stay loaded into memory following the request
 #### System message “Complete code”
 Default: 
 ```
-You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Don’t format code. Don’t put code in code block. Don’t repeat the input.
+You are a code autocompletion engine. Respond with a continuation of the code provided and nothing else. Code should not be in a code block. Anything that is not code should be written as a code comment.
 ```
 
-This system message is used when you run the “Complete code” command. You can try different messages to fine tune the output.
+This system message is used when you run the “Complete code” command. You can try different messages to fine-tune the output.
 
 #### System message “Assist”
 Default: 
 ```
-You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code block. Don’t repeat the input.
+You are an assistant helping with coding. Respond with code only. Don’t format code. Don’t put code in code blocks. Don’t repeat the input.
 ```
 
-This system message is used when you run the “Assist” command. You can try different messages to fine tune the output.
+This system message is used when you run the “Assist” command. You can try different messages to fine-tune the output.
 
 ### Privacy
 This extension needs **Send Network Requests** permission to send and receive requests to the locally running ollama server. No data will be sent to external servers.
-
-> This Nova extension is briefly inspired by [ollama-autocoder (VS Code extension)](https://github.com/10Nates/ollama-autocoder)

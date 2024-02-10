@@ -4,9 +4,12 @@
 
 const encoder = new TextDecoder();
 
+// Toggle which controls insertStream()
+let continueReading = true;
+
 let ollamaOrigin = nova.config.get('tobiaswolf.ollama.origin') ?? 'http://localhost:11434';
 let apiUrl = `${ollamaOrigin}/api`;
-let modelName = nova.config.get('tobiaswolf.ollama.modelName') ?? llama2;
+let modelName = nova.config.get('tobiaswolf.ollama.modelName') ?? 'llama2';
 
 const checkIfModelExists = async () => {
 	try {
@@ -39,6 +42,8 @@ const showError = async (message) => {
 
 const requestOllama = async (input, apiSystem) => {
 	try {
+		openCancelNotificationRequest();
+
 		if (input === '') {
 			console.log(`No input provided. ${input}`);
 			return;
@@ -84,6 +89,14 @@ const cleanResponseText = (responseText, editor) => {
 	return responseText;
 }
 
+const interruptCodeGeneration = () => {
+	// set continueReading toggle
+	continueReading = false;
+	setTimeout(() => {
+		continueReading = true;
+	}, 500);
+}
+
 const insertStream = async (reader, editor) => {
 	return await new Promise((resolve, reject) => {
 		let responseText = '';
@@ -91,6 +104,13 @@ const insertStream = async (reader, editor) => {
 		let inputPosition = startInputPosition;
 
 		const readStream = () => {
+			if (continueReading === false) {
+				const inputRange = new Range(startInputPosition, startInputPosition + responseText.length);
+
+				editor.addSelectionForRange(inputRange);
+				return reject('Stream reading interrupted');
+			}
+
 			reader.read().then(async ({ done, value }) => {
 				const data = JSON.parse(encoder.decode(value));
 				let responseTextChunk = data.response;
@@ -121,6 +141,7 @@ const insertStream = async (reader, editor) => {
 					newInputRange = new Range(startInputPosition, startInputPosition + responseText.length);
 
 					editor.addSelectionForRange(newInputRange);
+					nova.notifications.cancel('ollama-cancel-request');
 					resolve(responseText);
 				} else {
 					readStream();
@@ -136,45 +157,74 @@ const insertStream = async (reader, editor) => {
 	});
 }
 
+
+
+const openCancelNotificationRequest = async () => {
+	const notificationRequest = new NotificationRequest("ollama-cancel-request");
+	notificationRequest.title = nova.localize("Cancel output?");
+	notificationRequest.actions = [nova.localize("Cancel output")];
+
+	const promise = nova.notifications.add(notificationRequest);
+	promise.then(async (reply) => {
+		if (reply.actionIdx === 0) {
+			console.info('Cancel output');
+			interruptCodeGeneration();
+		}
+	});
+}
+
 const completeCode = async (editor) => {
-	var selectedRanges = editor.selectedRanges.reverse();
-	for (var range of selectedRanges) {
-		// get selected text
-		let input = editor.getTextInRange(range);
-		if (input === '') {
+	try {
+		var selectedRange = editor.selectedRange;
+		const selectedText = editor.selectedText;
+		let input = selectedText;
+		if (selectedText === '') {
 			// get text from cursor to beginning of file
-			input = editor.getTextInRange(new Range(0, range.end));
+			input = editor.getTextInRange(new Range(0, selectedRange.end));
 		}
 		const systemMessageCompleteCode = nova.config.get('tobiaswolf.ollama.systemMessageCompleteCode');
 		const response = await requestOllama(input, systemMessageCompleteCode);
 		const responseText = await insertStream(response.body.getReader(), editor);
+	} catch (exception) {
+		console.error(exception);
 	}
 }
 
 const openAssistant = async (editor) => {
-	let notificationRequest = new NotificationRequest("ollama-assistant");
-	const syntax = editor.document.syntax;
+	try {
+		const syntax = editor.document.syntax;
 
-	notificationRequest.title = nova.localize("How can I assist you?");
-	notificationRequest.body = nova.localize(`Language: ${syntax}`);
+		const selectedText = editor.selectedText;
+		let inputMessage = 'Write a command.';
 
-	if (syntax) {
-		notificationRequest.textInputValue = `${syntax}: `;
-	}
-
-	notificationRequest.type = "input";
-	notificationRequest.actions = [nova.localize("OK"), nova.localize("Cancel")];
-
-	let promise = nova.notifications.add(notificationRequest);
-	promise.then(async (reply) => {
-		if (reply.actionIdx === 0) {
-			const systemMessageAssist = nova.config.get('tobiaswolf.ollama.systemMessageAssist');
-			const response = await requestOllama(reply.textInputValue, systemMessageAssist)
-			const responseText = await insertStream(response.body.getReader(), editor);
+		if (selectedText !== '') {
+			inputMessage = 'Write a command, selected text is added to the end of the command.';
 		}
-	}, error => {
-		console.error(error);
-	});
+
+		nova.workspace.showInputPalette(inputMessage, {
+			value: syntax ? `${syntax}: ` : null,
+			placeholder: 'JS: Fetch request with json reponse.',
+		}, async (input) => {
+			console.log(input);
+			if (input) {
+				if (selectedText !== '') {
+					input += `
+
+					${selectedText}
+					`
+				}
+				try {
+					const systemMessageAssist = nova.config.get('tobiaswolf.ollama.systemMessageAssist');
+					const response = await requestOllama(input, systemMessageAssist)
+					const responseText = await insertStream(response.body.getReader(), editor);
+				} catch (exception) {
+					console.error(exception);
+				}
+			}
+		});
+	} catch (exception) {
+		console.error(exception);
+	}
 };
 
 
@@ -183,7 +233,6 @@ const openAssistant = async (editor) => {
 nova.config.onDidChange('tobiaswolf.ollama.origin', (disposable) => {
 	ollamaOrigin = disposable;
 	apiUrl = `${ollamaOrigin}/api`;
-	console.log(apiUrl);
 	checkIfModelExists();
 });
 nova.config.onDidChange('tobiaswolf.ollama.modelName', (disposable) => {

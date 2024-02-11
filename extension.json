@@ -3,7 +3,7 @@
   "name": "ollama",
   "organization": "Tobias Wolf",
   "description": "Generate and complete code with ollama.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "repository": "https://github.com/tobiasfabian/nova-ollama",
   "bugs": "https://github.com/tobiasfabian/nova-ollama/issues",

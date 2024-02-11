@@ -118,9 +118,6 @@ const cleanResponseText = (responseText, editor) => {
 const interruptCodeGeneration = () => {
 	// set continueReading toggle
 	continueReading = false;
-	setTimeout(() => {
-		continueReading = true;
-	}, 500);
 }
 
 const insertStream = async (reader, editor) => {
@@ -131,9 +128,12 @@ const insertStream = async (reader, editor) => {
 
 		const readStream = () => {
 			if (continueReading === false) {
-				const inputRange = new Range(startInputPosition, startInputPosition + responseText.length);
+				// reset continueReading toggle
+				continueReading = true;
 
+				const inputRange = new Range(startInputPosition, startInputPosition + responseText.length);
 				editor.addSelectionForRange(inputRange);
+
 				return reject('Stream reading interrupted');
 			}
 

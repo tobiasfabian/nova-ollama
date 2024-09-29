@@ -3,7 +3,7 @@
   "name": "ollama",
   "organization": "Tobias Wolf",
   "description": "Generate and complete code with ollama.",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "license": "MIT",
   "repository": "https://github.com/tobiasfabian/nova-ollama",
   "bugs": "https://github.com/tobiasfabian/nova-ollama/issues",
@@ -40,8 +40,8 @@
       "key": "tobiaswolf.ollama.modelName",
       "title": "Model name",
       "type": "string",
-      "placeholder": "e.g. llama2 or openhermes2.5-mistral:7b-q4_K_M",
-      "default": "llama2",
+      "placeholder": "e.g. llama3.2 or openhermes2.5-mistral:7b-q4_K_M",
+      "default": "llama3.2",
       "description": "The model has to be installed. Model names follow a model:tag format, where model can have an optional namespace such as example/model. The tag is optional and, if not provided, will default to latest. The tag is used to identify a specific version."
     },
     {

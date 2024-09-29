@@ -12,7 +12,7 @@ The extension comes with two commands, `Assist` and `Complete code`.
 **[ollama](https://ollama.com)** must be installed and running on your Mac. The model you want to use must be installed with ollama.
 
 > You can start ollama with `ollama serve` (or start the desktop application).\
-> If you don't already have the model you want to use installed, you can do this with `ollama pull llama2` (installs *llama2*).
+> If you don't already have the model you want to use installed, you can do this with `ollama pull llama3.2` (installs *llama3.2*).
 
 
 ## Usage
@@ -39,10 +39,10 @@ Default: `http://localhost:11434`
 Set the origin URL where ollama is running. If you are not sure which URL ollama is running on, check the output of `ollama serve`. (e.g. `Listening on 127.0.0.1:11434 (version 0.1.24)`)
 
 #### Model name
-Default: `llama2`  
+Default: `llama3.2`  
 Example: `openhermes2.5-mistral:7b-q4_K_M`
 
-The name of the model you want to use. The model must be installed. To install a new model run `ollama pull llama2` [ollama CLI Reference](https://github.com/ollama/ollama/blob/main/README.md#cli-reference)
+The name of the model you want to use. The model must be installed. To install a new model run `ollama pull llama3.2` [ollama CLI Reference](https://github.com/ollama/ollama/blob/main/README.md#cli-reference)
 
 Model names follow a model:tag format, where model can have an optional namespace such as example/model. The tag is optional and, if not provided, will default to latest. The tag is used to identify a specific version. [ollama API Docs](https://github.com/ollama/ollama/blob/main/docs/api.md#model-names)
 

@@ -7,6 +7,9 @@ const encoder = new TextDecoder();
 // Toggle which controls insertStream()
 let continueReading = true;
 
+// Context of previous answers
+let context = null;
+
 
 const getApiUrl = () => {
 	let ollamaOrigin = nova.workspace.config.get('tobiaswolf.ollama.origin') ?? nova.config.get('tobiaswolf.ollama.origin') ?? 'http://localhost:11434'
@@ -14,7 +17,7 @@ const getApiUrl = () => {
 }
 
 const getModelName = () => {
-	return nova.workspace.config.get('tobiaswolf.ollama.modelName') ?? nova.config.get('tobiaswolf.ollama.modelName') ?? 'llama2'
+	return nova.workspace.config.get('tobiaswolf.ollama.modelName') ?? nova.config.get('tobiaswolf.ollama.modelName') ?? 'llama3.2'
 }
 
 const getModelParameters = () => {
@@ -54,7 +57,7 @@ const showError = async (message) => {
 	nova.notifications.add(notificationRequest);
 }
 
-const requestOllama = async (input, apiSystem) => {
+const requestOllama = async (input, apiSystem = '', stream = true) => {
 	try {
 		openCancelNotificationRequest();
 		const modelName = getModelName();
@@ -75,9 +78,10 @@ const requestOllama = async (input, apiSystem) => {
 				model: modelName,
 				prompt: input,
 				system: apiSystem,
-				stream: true,
+				stream,
 				options: modelParameters,
 				keep_alive: keepAlive,
+        context: context,
 			}),
 		}).catch((exception) => {
 			console.log(exception);
@@ -120,6 +124,12 @@ const interruptCodeGeneration = () => {
 	continueReading = false;
 }
 
+
+/**
+ * @param {ReadableStream} reader
+ * @param {TextEditor} editor
+ * @returns {Promise<object>} object with responseText and context
+ */
 const insertStream = async (reader, editor) => {
 	return await new Promise((resolve, reject) => {
 		let responseText = '';
@@ -167,8 +177,12 @@ const insertStream = async (reader, editor) => {
 					newInputRange = new Range(startInputPosition, startInputPosition + responseText.length);
 
 					editor.addSelectionForRange(newInputRange);
+
+          // set context
+          context = data.context;
+
 					nova.notifications.cancel('ollama-cancel-request');
-					resolve(responseText);
+					resolve({ responseText: responseText, context: data.context });
 				} else {
 					readStream();
 				}
@@ -210,7 +224,7 @@ const completeCode = async (editor) => {
 		}
 		const systemMessageCompleteCode = nova.config.get('tobiaswolf.ollama.systemMessageCompleteCode');
 		const response = await requestOllama(input, systemMessageCompleteCode);
-		const responseText = await insertStream(response.body.getReader(), editor);
+		await insertStream(response.body.getReader(), editor);
 	} catch (exception) {
 		console.error(exception);
 	}
@@ -218,7 +232,8 @@ const completeCode = async (editor) => {
 
 const openAssistant = async (editor) => {
 	try {
-		const syntax = editor.document.syntax;
+    const document = editor.document;
+		const syntax = document.syntax;
 
 		const selectedText = editor.selectedText;
 		let inputMessage = 'Write a command.';
@@ -226,6 +241,27 @@ const openAssistant = async (editor) => {
 		if (selectedText !== '') {
 			inputMessage = 'Write a command, selected text is added to the end of the command.';
 		}
+
+    // preload model
+    const modelName = getModelName();
+    const apiUrl = getApiUrl();
+    const modelParameters = getModelParameters();
+    const keepAlive = getModelKeepAlive();
+    (async () => {
+      await fetch(`${apiUrl}/generate`, {
+        method: 'POST',
+        body: JSON.stringify({
+          model: modelName,
+          stream: false,
+          options: modelParameters,
+          keep_alive: keepAlive,
+        }),
+      }).catch((exception) => {
+        console.log(exception);
+        showError(exception);
+      });
+      console.log(`Model ${modelName} preloaded`);
+    })();
 
 		nova.workspace.showInputPalette(inputMessage, {
 			value: syntax ? `${syntax}: ` : null,
@@ -242,7 +278,7 @@ const openAssistant = async (editor) => {
 				try {
 					const systemMessageAssist = nova.config.get('tobiaswolf.ollama.systemMessageAssist');
 					const response = await requestOllama(input, systemMessageAssist)
-					const responseText = await insertStream(response.body.getReader(), editor);
+					await insertStream(response.body.getReader(), editor);
 				} catch (exception) {
 					console.error(exception);
 				}
